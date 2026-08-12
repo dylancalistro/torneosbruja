@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { getTorneos, getConfiguracion } from '../lib/api'
 import TorneoCard from '../components/TorneoCard'
-
-const GRUPOS = [
-  { estado: 'activo', titulo: 'En curso' },
-  { estado: 'proximamente', titulo: 'Próximamente' },
-  { estado: 'finalizado', titulo: 'Finalizados' },
-]
+import TorneoTablaCard from '../components/TorneoTablaCard'
 
 export default function Home() {
   const { data: torneos, isLoading, isError } = useQuery({
@@ -14,6 +9,9 @@ export default function Home() {
     queryFn: getTorneos,
   })
   const { data: config } = useQuery({ queryKey: ['configuracion'], queryFn: getConfiguracion })
+
+  const conTabla = torneos?.filter((t) => t.estado === 'activo' || t.estado === 'finalizado') ?? []
+  const proximos = torneos?.filter((t) => t.estado === 'proximamente') ?? []
 
   return (
     <div className="space-y-10">
@@ -30,21 +28,31 @@ export default function Home() {
         <p className="text-sm text-gray-500">Todavía no hay torneos publicados.</p>
       )}
 
-      {GRUPOS.map(({ estado, titulo }) => {
-        const items = torneos?.filter((t) => t.estado === estado) ?? []
-        if (items.length === 0) return null
+      {conTabla.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">
+            Posiciones
+          </h2>
+          <div className="grid gap-4 lg:grid-cols-3">
+            {conTabla.map((torneo) => (
+              <TorneoTablaCard key={torneo.id} torneo={torneo} />
+            ))}
+          </div>
+        </section>
+      )}
 
-        return (
-          <section key={estado}>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">{titulo}</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((torneo) => (
-                <TorneoCard key={torneo.id} torneo={torneo} />
-              ))}
-            </div>
-          </section>
-        )
-      })}
+      {proximos.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">
+            Próximamente
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {proximos.map((torneo) => (
+              <TorneoCard key={torneo.id} torneo={torneo} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

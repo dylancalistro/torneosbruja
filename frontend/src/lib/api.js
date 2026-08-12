@@ -18,10 +18,44 @@ export const getTablaPosiciones = (torneoId) =>
     .from('vista_tabla_posiciones')
     .select('*')
     .eq('torneo_id', torneoId)
+    .order('puntos', { ascending: false })
+    .order('dg', { ascending: false })
+    .order('gf', { ascending: false })
+    .then(throwIfError)
+
+export const getVallaVencida = (torneoId) =>
+  supabase
+    .from('vista_tabla_posiciones')
+    .select('*')
+    .eq('torneo_id', torneoId)
+    .order('gc', { ascending: true })
+    .order('pj', { ascending: false })
     .then(throwIfError)
 
 export const getGoleadores = (torneoId) =>
-  supabase.from('vista_goleadores').select('*').eq('torneo_id', torneoId).then(throwIfError)
+  supabase
+    .from('vista_goleadores')
+    .select('*')
+    .eq('torneo_id', torneoId)
+    .order('goles', { ascending: false })
+    .then(throwIfError)
+
+export const getTarjetas = (torneoId) =>
+  supabase
+    .from('vista_tarjetas')
+    .select('*')
+    .eq('torneo_id', torneoId)
+    .order('amarillas', { ascending: false })
+    .order('rojas', { ascending: false })
+    .then(throwIfError)
+
+export const getSuspensiones = (torneoId) =>
+  supabase
+    .from('suspensiones')
+    .select('*, jugador:jugadores(nombre), equipo:equipos(nombre)')
+    .eq('torneo_id', torneoId)
+    .order('created_at', { ascending: false })
+    .then(throwIfError)
 
 export const getEquiposDeTorneo = (torneoId) =>
   supabase
@@ -30,11 +64,24 @@ export const getEquiposDeTorneo = (torneoId) =>
     .eq('torneo_id', torneoId)
     .then(throwIfError)
 
+export const getJugadoresDeTorneo = (torneoId) =>
+  supabase
+    .from('torneo_equipos')
+    .select('equipo:equipos(id, nombre, jugadores(id, nombre))')
+    .eq('torneo_id', torneoId)
+    .then(throwIfError)
+    .then((rows) =>
+      rows.flatMap((row) =>
+        (row.equipo?.jugadores ?? []).map((j) => ({ ...j, equipo_id: row.equipo.id, equipo_nombre: row.equipo.nombre }))
+      )
+    )
+
 export const getPartidos = (torneoId) =>
   supabase
     .from('partidos')
     .select('*')
     .eq('torneo_id', torneoId)
+    .order('jornada', { ascending: true, nullsFirst: false })
     .order('fecha', { ascending: true })
     .then(throwIfError)
 
@@ -52,6 +99,13 @@ export const getJugadoresDeEquipo = (equipoId) =>
 export const getGolesDePartido = (partidoId) =>
   supabase
     .from('partido_goles')
+    .select('*, jugador:jugadores(nombre)')
+    .eq('partido_id', partidoId)
+    .then(throwIfError)
+
+export const getTarjetasDePartido = (partidoId) =>
+  supabase
+    .from('tarjetas')
     .select('*, jugador:jugadores(nombre)')
     .eq('partido_id', partidoId)
     .then(throwIfError)
@@ -106,6 +160,20 @@ export const agregarGol = (gol) =>
   supabase.from('partido_goles').insert(gol).select().single().then(throwIfError)
 
 export const eliminarGol = (id) => supabase.from('partido_goles').delete().eq('id', id).then(throwIfError)
+
+export const agregarTarjeta = (tarjeta) =>
+  supabase.from('tarjetas').insert(tarjeta).select().single().then(throwIfError)
+
+export const eliminarTarjeta = (id) => supabase.from('tarjetas').delete().eq('id', id).then(throwIfError)
+
+export const crearSuspension = (suspension) =>
+  supabase.from('suspensiones').insert(suspension).select().single().then(throwIfError)
+
+export const actualizarSuspension = (id, cambios) =>
+  supabase.from('suspensiones').update(cambios).eq('id', id).select().single().then(throwIfError)
+
+export const eliminarSuspension = (id) =>
+  supabase.from('suspensiones').delete().eq('id', id).then(throwIfError)
 
 export const actualizarConfiguracion = (cambios) =>
   supabase.from('configuracion_sitio').update(cambios).eq('id', 1).select().single().then(throwIfError)

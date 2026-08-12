@@ -10,6 +10,7 @@ import {
   inscribirEquipo,
   quitarInscripcion,
   getJugadoresDeEquipo,
+  getJugadoresDeTorneo,
   crearJugador,
   eliminarJugador,
   getPartidos,
@@ -19,6 +20,13 @@ import {
   getGolesDePartido,
   agregarGol,
   eliminarGol,
+  getTarjetasDePartido,
+  agregarTarjeta,
+  eliminarTarjeta,
+  getSuspensiones,
+  crearSuspension,
+  actualizarSuspension,
+  eliminarSuspension,
 } from '../../lib/api'
 
 const ESTADOS = ['proximamente', 'activo', 'finalizado']
@@ -243,6 +251,11 @@ export default function TorneoAdmin() {
         <h2 className="text-lg font-semibold">Partidos</h2>
         <PartidosSection torneoId={id} equiposInscriptos={equiposInscriptos ?? []} />
       </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Suspendidos</h2>
+        <SuspensionesSection torneoId={id} />
+      </section>
     </div>
   )
 }
@@ -335,13 +348,20 @@ function PartidosSection({ torneoId, equiposInscriptos }) {
 
   const [local, setLocal] = useState('')
   const [visitante, setVisitante] = useState('')
+  const [jornada, setJornada] = useState('')
 
   const crear = useMutation({
     mutationFn: () =>
-      crearPartido({ torneo_id: torneoId, equipo_local_id: local, equipo_visitante_id: visitante }),
+      crearPartido({
+        torneo_id: torneoId,
+        equipo_local_id: local,
+        equipo_visitante_id: visitante,
+        jornada: jornada ? Number(jornada) : null,
+      }),
     onSuccess: () => {
       setLocal('')
       setVisitante('')
+      setJornada('')
       queryClient.invalidateQueries({ queryKey: ['partidos', torneoId] })
     },
   })
@@ -373,6 +393,17 @@ function PartidosSection({ torneoId, equiposInscriptos }) {
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Fecha (jornada, opcional)</label>
+          <input
+            type="number"
+            min="1"
+            value={jornada}
+            onChange={(e) => setJornada(e.target.value)}
+            placeholder="Ej: 12"
+            className={`${INPUT_CLS} w-24`}
+          />
         </div>
         <button
           disabled={!local || !visitante || local === visitante || crear.isPending}
@@ -462,6 +493,37 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
     },
   })
 
+  const { data: tarjetas } = useQuery({
+    queryKey: ['tarjetas-partido', partido.id],
+    queryFn: () => getTarjetasDePartido(partido.id),
+    enabled: abierto,
+  })
+  const [jugadorTarjeta, setJugadorTarjeta] = useState('')
+  const [tipoTarjeta, setTipoTarjeta] = useState('amarilla')
+  const agregarTarjetaMut = useMutation({
+    mutationFn: () => {
+      const j = jugadoresDisponibles.find((j) => j.id === jugadorTarjeta)
+      return agregarTarjeta({
+        partido_id: partido.id,
+        jugador_id: jugadorTarjeta,
+        equipo_id: j.equipo_id,
+        tipo: tipoTarjeta,
+      })
+    },
+    onSuccess: () => {
+      setJugadorTarjeta('')
+      queryClient.invalidateQueries({ queryKey: ['tarjetas-partido', partido.id] })
+      queryClient.invalidateQueries({ queryKey: ['tarjetas', torneoId] })
+    },
+  })
+  const quitarTarjetaMut = useMutation({
+    mutationFn: (tarjetaId) => eliminarTarjeta(tarjetaId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tarjetas-partido', partido.id] })
+      queryClient.invalidateQueries({ queryKey: ['tarjetas', torneoId] })
+    },
+  })
+
   return (
     <div className="border border-gray-200 dark:border-gray-800 rounded p-3">
       <div className="flex items-center justify-between gap-2">
@@ -535,8 +597,180 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
               </button>
             </div>
           </div>
+
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Tarjetas del partido</p>
+            <ul className="text-sm space-y-1 mb-2">
+              {tarjetas?.map((t) => (
+                <li key={t.id} className="flex items-center justify-between">
+                  <span>
+                    {t.tipo === 'amarilla' ? '🟨' : '🟥'} {t.jugador?.nombre}
+                  </span>
+                  <button
+                    onClick={() => quitarTarjetaMut.mutate(t.id)}
+                    className="text-xs text-red-500 hover:underline"
+                  >
+                    Quitar
+                  </button>
+                </li>
+              ))}
+              {tarjetas?.length === 0 && <li className="text-gray-400">Sin tarjetas cargadas.</li>}
+            </ul>
+            <div className="flex flex-wrap gap-2">
+              <select
+                value={jugadorTarjeta}
+                onChange={(e) => setJugadorTarjeta(e.target.value)}
+                className={`${INPUT_CLS} flex-1 min-w-[10rem]`}
+              >
+                <option value="">Jugador…</option>
+                {jugadoresDisponibles.map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.nombre}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={tipoTarjeta}
+                onChange={(e) => setTipoTarjeta(e.target.value)}
+                className={`${INPUT_CLS} w-32`}
+              >
+                <option value="amarilla">Amarilla</option>
+                <option value="roja">Roja</option>
+              </select>
+              <button
+                disabled={!jugadorTarjeta || agregarTarjetaMut.isPending}
+                onClick={() => agregarTarjetaMut.mutate()}
+                className="border border-gray-300 dark:border-gray-700 rounded px-3 disabled:opacity-50"
+              >
+                + Tarjeta
+              </button>
+            </div>
+          </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function SuspensionesSection({ torneoId }) {
+  const queryClient = useQueryClient()
+  const { data: suspensiones } = useQuery({
+    queryKey: ['suspensiones', torneoId],
+    queryFn: () => getSuspensiones(torneoId),
+  })
+  const { data: jugadores } = useQuery({
+    queryKey: ['jugadores-torneo', torneoId],
+    queryFn: () => getJugadoresDeTorneo(torneoId),
+  })
+
+  const [jugadorId, setJugadorId] = useState('')
+  const [motivo, setMotivo] = useState('')
+  const [partidosTotales, setPartidosTotales] = useState(1)
+
+  const invalidar = () => queryClient.invalidateQueries({ queryKey: ['suspensiones', torneoId] })
+
+  const crear = useMutation({
+    mutationFn: () => {
+      const j = jugadores.find((j) => j.id === jugadorId)
+      return crearSuspension({
+        torneo_id: torneoId,
+        jugador_id: jugadorId,
+        equipo_id: j.equipo_id,
+        motivo: motivo || null,
+        partidos_totales: Number(partidosTotales),
+        partidos_restantes: Number(partidosTotales),
+      })
+    },
+    onSuccess: () => {
+      setJugadorId('')
+      setMotivo('')
+      setPartidosTotales(1)
+      invalidar()
+    },
+  })
+
+  const restarFecha = useMutation({
+    mutationFn: (s) => actualizarSuspension(s.id, { partidos_restantes: Math.max(0, s.partidos_restantes - 1) }),
+    onSuccess: invalidar,
+  })
+
+  const eliminar = useMutation({
+    mutationFn: (id) => eliminarSuspension(id),
+    onSuccess: invalidar,
+  })
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2 items-end">
+        <select
+          value={jugadorId}
+          onChange={(e) => setJugadorId(e.target.value)}
+          className={`${INPUT_CLS} flex-1 min-w-[12rem]`}
+        >
+          <option value="">Jugador…</option>
+          {jugadores?.map((j) => (
+            <option key={j.id} value={j.id}>
+              {j.nombre} ({j.equipo_nombre})
+            </option>
+          ))}
+        </select>
+        <input
+          value={motivo}
+          onChange={(e) => setMotivo(e.target.value)}
+          placeholder="Motivo (opcional)"
+          className={`${INPUT_CLS} flex-1 min-w-[10rem]`}
+        />
+        <div className="w-28">
+          <label className="block text-xs text-gray-500 mb-1">Partidos</label>
+          <input
+            type="number"
+            min="1"
+            value={partidosTotales}
+            onChange={(e) => setPartidosTotales(e.target.value)}
+            className={INPUT_CLS}
+          />
+        </div>
+        <button
+          disabled={!jugadorId || crear.isPending}
+          onClick={() => crear.mutate()}
+          className="border border-gray-300 dark:border-gray-700 rounded px-3 py-2 disabled:opacity-50"
+        >
+          Suspender
+        </button>
+      </div>
+
+      <ul className="divide-y divide-gray-100 dark:divide-gray-900">
+        {suspensiones?.map((s) => (
+          <li key={s.id} className="py-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+            <span>
+              <span className="font-medium">{s.jugador?.nombre}</span>{' '}
+              <span className="text-gray-500">
+                ({s.equipo?.nombre}
+                {s.motivo ? ` — ${s.motivo}` : ''})
+              </span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="font-semibold">
+                {s.partidos_restantes} / {s.partidos_totales}
+              </span>
+              {s.partidos_restantes > 0 && (
+                <button
+                  onClick={() => restarFecha.mutate(s)}
+                  className="text-xs border border-gray-300 dark:border-gray-700 rounded px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  Cumplió 1 fecha
+                </button>
+              )}
+              <button onClick={() => eliminar.mutate(s.id)} className="text-xs text-red-500 hover:underline">
+                Eliminar
+              </button>
+            </span>
+          </li>
+        ))}
+        {suspensiones?.length === 0 && (
+          <li className="py-2 text-sm text-gray-400">No hay jugadores suspendidos.</li>
+        )}
+      </ul>
     </div>
   )
 }

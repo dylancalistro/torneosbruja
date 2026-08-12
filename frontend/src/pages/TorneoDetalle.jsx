@@ -1,54 +1,55 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   getTorneo,
   getTablaPosiciones,
+  getVallaVencida,
   getGoleadores,
+  getTarjetas,
+  getSuspensiones,
   getEquiposDeTorneo,
   getPartidos,
 } from '../lib/api'
+import { estadoCfg } from '../lib/estados'
 import TablaPosiciones from '../components/TablaPosiciones'
 import TablaGoleadores from '../components/TablaGoleadores'
-import { estadoCfg } from '../lib/estados'
+import TablaVallaVencida from '../components/TablaVallaVencida'
+import TablaTarjetas from '../components/TablaTarjetas'
+import TablaSuspendidos from '../components/TablaSuspendidos'
+import FixturePorJornada from '../components/FixturePorJornada'
+import Tabs from '../components/Tabs'
+
+const TABS = [
+  { key: 'posiciones', label: 'Posiciones' },
+  { key: 'fixture', label: 'Fixture' },
+  { key: 'estadisticas', label: 'Estadísticas' },
+  { key: 'suspendidos', label: 'Suspendidos' },
+]
 
 export default function TorneoDetalle() {
   const { id } = useParams()
+  const [tab, setTab] = useState('posiciones')
 
   const { data: torneo, isLoading, isError } = useQuery({
     queryKey: ['torneo', id],
     queryFn: () => getTorneo(id),
-  })
-  const { data: posiciones } = useQuery({
-    queryKey: ['tabla-posiciones', id],
-    queryFn: () => getTablaPosiciones(id),
-    enabled: !!torneo,
-  })
-  const { data: goleadores } = useQuery({
-    queryKey: ['goleadores', id],
-    queryFn: () => getGoleadores(id),
-    enabled: !!torneo,
   })
   const { data: equipos } = useQuery({
     queryKey: ['equipos-torneo', id],
     queryFn: () => getEquiposDeTorneo(id),
     enabled: !!torneo,
   })
-  const { data: partidos } = useQuery({
-    queryKey: ['partidos', id],
-    queryFn: () => getPartidos(id),
-    enabled: !!torneo,
-  })
 
   if (isLoading) return <p className="text-sm text-gray-500">Cargando torneo…</p>
   if (isError || !torneo) return <p className="text-sm text-red-500">No se encontró el torneo.</p>
 
+  const cfg = estadoCfg(torneo.estado)
   const nombreEquipo = (equipoId) =>
     equipos?.find((e) => e.equipo?.id === equipoId)?.equipo?.nombre ?? '—'
 
-  const cfg = estadoCfg(torneo.estado)
-
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <div>
         <Link to="/" className="text-sm text-gray-500 hover:underline">
           ← Volver a torneos
@@ -65,42 +66,74 @@ export default function TorneoDetalle() {
         )}
       </div>
 
-      <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">
-          Tabla de posiciones
-        </h2>
-        <TablaPosiciones filas={posiciones} />
-      </section>
+      <Tabs tabs={TABS} active={tab} onChange={setTab} />
 
-      <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Goleadores</h2>
-        <TablaGoleadores filas={goleadores} />
-      </section>
+      <div>
+        {tab === 'posiciones' && <PosicionesPanel torneoId={id} />}
+        {tab === 'fixture' && <FixturePanel torneoId={id} nombreEquipo={nombreEquipo} />}
+        {tab === 'estadisticas' && <EstadisticasPanel torneoId={id} />}
+        {tab === 'suspendidos' && <SuspendidosPanel torneoId={id} />}
+      </div>
+    </div>
+  )
+}
 
+function PosicionesPanel({ torneoId }) {
+  const { data } = useQuery({ queryKey: ['tabla-posiciones', torneoId], queryFn: () => getTablaPosiciones(torneoId) })
+  return <TablaPosiciones filas={data} />
+}
+
+function FixturePanel({ torneoId, nombreEquipo }) {
+  const { data } = useQuery({ queryKey: ['partidos', torneoId], queryFn: () => getPartidos(torneoId) })
+  return <FixturePorJornada partidos={data} nombreEquipo={nombreEquipo} />
+}
+
+function EstadisticasPanel({ torneoId }) {
+  const [sub, setSub] = useState('goleadores')
+  const { data: goleadores } = useQuery({
+    queryKey: ['goleadores', torneoId],
+    queryFn: () => getGoleadores(torneoId),
+    enabled: sub === 'goleadores',
+  })
+  const { data: vallaVencida } = useQuery({
+    queryKey: ['valla-vencida', torneoId],
+    queryFn: () => getVallaVencida(torneoId),
+    enabled: sub === 'valla-vencida',
+  })
+
+  return (
+    <div className="space-y-4">
+      <Tabs
+        size="sm"
+        tabs={[
+          { key: 'goleadores', label: 'Goleadores' },
+          { key: 'valla-vencida', label: 'Valla vencida' },
+        ]}
+        active={sub}
+        onChange={setSub}
+      />
+      {sub === 'goleadores' && <TablaGoleadores filas={goleadores} />}
+      {sub === 'valla-vencida' && <TablaVallaVencida filas={vallaVencida} />}
+    </div>
+  )
+}
+
+function SuspendidosPanel({ torneoId }) {
+  const { data: tarjetas } = useQuery({ queryKey: ['tarjetas', torneoId], queryFn: () => getTarjetas(torneoId) })
+  const { data: suspensiones } = useQuery({
+    queryKey: ['suspensiones', torneoId],
+    queryFn: () => getSuspensiones(torneoId),
+  })
+
+  return (
+    <div className="space-y-8">
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Partidos</h2>
-        {(!partidos || partidos.length === 0) && (
-          <p className="text-sm text-gray-500">Todavía no hay partidos cargados.</p>
-        )}
-        <ul className="divide-y divide-gray-100 dark:divide-gray-900">
-          {partidos?.map((p) => (
-            <li key={p.id} className="py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
-              <span>
-                {nombreEquipo(p.equipo_local_id)} <span className="text-gray-400">vs</span>{' '}
-                {nombreEquipo(p.equipo_visitante_id)}
-              </span>
-              {p.jugado ? (
-                <span className="font-semibold tabular-nums">
-                  {p.goles_local} - {p.goles_visitante}
-                </span>
-              ) : (
-                <span className="text-xs font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-1">
-                  A jugar
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Suspendidos</h2>
+        <TablaSuspendidos filas={suspensiones} />
+      </section>
+      <section>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Tarjetas</h2>
+        <TablaTarjetas filas={tarjetas} />
       </section>
     </div>
   )

@@ -52,9 +52,34 @@ create table partidos (
   goles_visitante int check (goles_visitante >= 0),
   fecha timestamptz,
   jugado boolean not null default false,
+  jornada int,
   created_at timestamptz not null default now(),
   check (equipo_local_id <> equipo_visitante_id),
   check (jugado = false or (goles_local is not null and goles_visitante is not null))
+);
+
+-- Tarjetas cargadas por partido
+create table tarjetas (
+  id uuid primary key default gen_random_uuid(),
+  partido_id uuid not null references partidos(id) on delete cascade,
+  jugador_id uuid not null references jugadores(id) on delete cascade,
+  equipo_id uuid not null references equipos(id),
+  tipo text not null check (tipo in ('amarilla', 'roja')),
+  created_at timestamptz not null default now()
+);
+
+-- Suspensiones: se gestionan a mano desde el admin. El criterio de cuántas
+-- tarjetas ameritan una suspensión varía según el reglamento de cada torneo,
+-- así que no se calcula solo a partir de las tarjetas.
+create table suspensiones (
+  id uuid primary key default gen_random_uuid(),
+  torneo_id uuid not null references torneos(id) on delete cascade,
+  jugador_id uuid not null references jugadores(id) on delete cascade,
+  equipo_id uuid not null references equipos(id),
+  motivo text,
+  partidos_totales int not null default 1 check (partidos_totales >= 1),
+  partidos_restantes int not null default 1 check (partidos_restantes >= 0),
+  created_at timestamptz not null default now()
 );
 
 create table partido_goles (
@@ -91,9 +116,13 @@ create index idx_jugadores_equipo on jugadores(equipo_id);
 create index idx_partidos_torneo on partidos(torneo_id);
 create index idx_partidos_local on partidos(equipo_local_id);
 create index idx_partidos_visitante on partidos(equipo_visitante_id);
+create index idx_partidos_jornada on partidos(torneo_id, jornada);
 create index idx_partido_goles_partido on partido_goles(partido_id);
 create index idx_partido_goles_jugador on partido_goles(jugador_id);
 create index idx_partido_goles_equipo on partido_goles(equipo_id);
+create index idx_tarjetas_partido on tarjetas(partido_id);
+create index idx_tarjetas_jugador on tarjetas(jugador_id);
+create index idx_suspensiones_torneo on suspensiones(torneo_id);
 
 -- =========================================================
 -- VISTAS (cálculo automático de posiciones y goleadores)
@@ -182,6 +211,24 @@ join equipos e on e.id = pg.equipo_id
 group by p.torneo_id, pg.jugador_id, j.nombre, pg.equipo_id, e.nombre
 order by p.torneo_id, goles desc;
 
+-- Tarjetas acumuladas por jugador y torneo
+create or replace view vista_tarjetas
+with (security_invoker = true) as
+select
+  p.torneo_id,
+  t.jugador_id,
+  j.nombre as jugador_nombre,
+  t.equipo_id,
+  e.nombre as equipo_nombre,
+  count(*) filter (where t.tipo = 'amarilla') as amarillas,
+  count(*) filter (where t.tipo = 'roja') as rojas
+from tarjetas t
+join partidos p on p.id = t.partido_id
+join jugadores j on j.id = t.jugador_id
+join equipos e on e.id = t.equipo_id
+group by p.torneo_id, t.jugador_id, j.nombre, t.equipo_id, e.nombre
+order by amarillas desc, rojas desc;
+
 -- =========================================================
 -- ROW LEVEL SECURITY
 -- Lectura pública (anon + authenticated), escritura solo authenticated.
@@ -194,6 +241,8 @@ alter table torneo_equipos enable row level security;
 alter table jugadores enable row level security;
 alter table partidos enable row level security;
 alter table partido_goles enable row level security;
+alter table tarjetas enable row level security;
+alter table suspensiones enable row level security;
 alter table configuracion_sitio enable row level security;
 
 create policy "torneos_select_publico" on torneos for select using (true);
@@ -225,6 +274,16 @@ create policy "partido_goles_select_publico" on partido_goles for select using (
 create policy "partido_goles_insert_admin" on partido_goles for insert to authenticated with check (true);
 create policy "partido_goles_update_admin" on partido_goles for update to authenticated using (true) with check (true);
 create policy "partido_goles_delete_admin" on partido_goles for delete to authenticated using (true);
+
+create policy "tarjetas_select_publico" on tarjetas for select using (true);
+create policy "tarjetas_insert_admin" on tarjetas for insert to authenticated with check (true);
+create policy "tarjetas_update_admin" on tarjetas for update to authenticated using (true) with check (true);
+create policy "tarjetas_delete_admin" on tarjetas for delete to authenticated using (true);
+
+create policy "suspensiones_select_publico" on suspensiones for select using (true);
+create policy "suspensiones_insert_admin" on suspensiones for insert to authenticated with check (true);
+create policy "suspensiones_update_admin" on suspensiones for update to authenticated using (true) with check (true);
+create policy "suspensiones_delete_admin" on suspensiones for delete to authenticated using (true);
 
 create policy "configuracion_select_publico" on configuracion_sitio for select using (true);
 create policy "configuracion_update_admin" on configuracion_sitio for update to authenticated using (true) with check (true);
