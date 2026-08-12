@@ -45,8 +45,7 @@ export default function TorneoDetalle() {
   if (isError || !torneo) return <p className="text-sm text-red-500">No se encontró el torneo.</p>
 
   const cfg = estadoCfg(torneo.estado)
-  const nombreEquipo = (equipoId) =>
-    equipos?.find((e) => e.equipo?.id === equipoId)?.equipo?.nombre ?? '—'
+  const equipoDe = (equipoId) => equipos?.find((e) => e.equipo?.id === equipoId)?.equipo
 
   return (
     <div className="space-y-6">
@@ -70,7 +69,7 @@ export default function TorneoDetalle() {
 
       <div>
         {tab === 'posiciones' && <PosicionesPanel torneoId={id} />}
-        {tab === 'fixture' && <FixturePanel torneoId={id} nombreEquipo={nombreEquipo} />}
+        {tab === 'fixture' && <FixturePanel torneoId={id} equipoDe={equipoDe} />}
         {tab === 'estadisticas' && <EstadisticasPanel torneoId={id} />}
         {tab === 'suspendidos' && <SuspendidosPanel torneoId={id} />}
       </div>
@@ -83,9 +82,9 @@ function PosicionesPanel({ torneoId }) {
   return <TablaPosiciones filas={data} />
 }
 
-function FixturePanel({ torneoId, nombreEquipo }) {
+function FixturePanel({ torneoId, equipoDe }) {
   const { data } = useQuery({ queryKey: ['partidos', torneoId], queryFn: () => getPartidos(torneoId) })
-  return <FixturePorJornada partidos={data} nombreEquipo={nombreEquipo} />
+  return <FixturePorJornada partidos={data} equipoDe={equipoDe} />
 }
 
 function EstadisticasPanel({ torneoId }) {
