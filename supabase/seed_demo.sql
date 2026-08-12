@@ -64,10 +64,13 @@ begin
     (v_torneo_id, v_jugador4, v_equipo_rio, 'Doble amarilla', 1, 1);
 
   update configuracion_sitio set
-    telefono = '+54 9 11 1234-5678',
-    whatsapp = '+54 9 11 1234-5678',
-    email = 'contacto@torneosbruja.com',
-    instagram = '@torneosbruja',
-    descripcion_general = 'Organizamos torneos de fútbol amateur. Estos son los torneos disponibles.'
+    telefono = '2216143834',
+    whatsapp = '2216143834',
+    instagram = '@complejo.35',
+    direccion = '145 e/ 34 y 35, La Plata, Buenos Aires',
+    servicios = '3 Canchas de Fútbol 9
+Torneos, Amistosos y Eventos
+Turnos y Consultas',
+    descripcion_general = 'Complejo de fútbol 9 en La Plata. Torneos, amistosos y eventos.'
   where id = 1;
 end $$;

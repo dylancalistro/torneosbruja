@@ -9,9 +9,13 @@ const CAMPOS = [
   { key: 'email', label: 'Email' },
   { key: 'instagram', label: 'Instagram' },
   { key: 'facebook', label: 'Facebook' },
+  { key: 'direccion', label: 'Dirección' },
   { key: 'descripcion_general', label: 'Descripción general (se muestra en el inicio)' },
   { key: 'logo_url', label: 'URL del logo' },
 ]
+
+const INPUT_CLS =
+  'w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
 
 export default function Config() {
   const queryClient = useQueryClient()
@@ -30,6 +34,8 @@ export default function Config() {
         email: form.email || null,
         instagram: form.instagram || null,
         facebook: form.facebook || null,
+        direccion: form.direccion || null,
+        servicios: form.servicios || null,
         descripcion_general: form.descripcion_general || null,
         logo_url: form.logo_url || null,
       }),
@@ -58,10 +64,23 @@ export default function Config() {
             <input
               value={form[key] ?? ''}
               onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-              className="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              className={INPUT_CLS}
             />
           </div>
         ))}
+
+        <div>
+          <label className="block text-sm text-gray-500 mb-1">
+            Servicios (uno por línea, se muestran como lista en el inicio)
+          </label>
+          <textarea
+            rows={3}
+            value={form.servicios ?? ''}
+            onChange={(e) => setForm({ ...form, servicios: e.target.value })}
+            placeholder={'3 Canchas de Fútbol 9\nTorneos, Amistosos y Eventos\nTurnos y Consultas'}
+            className={INPUT_CLS}
+          />
+        </div>
 
         {guardar.isError && <p className="text-sm text-red-500">No se pudo guardar.</p>}
         {guardar.isSuccess && <p className="text-sm text-green-600">Guardado.</p>}
@@ -69,7 +88,7 @@ export default function Config() {
         <button
           type="submit"
           disabled={guardar.isPending}
-          className="bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 rounded px-4 py-2 disabled:opacity-50"
+          className="bg-brand-700 hover:bg-brand-800 text-white rounded px-4 py-2 disabled:opacity-50"
         >
           Guardar
         </button>

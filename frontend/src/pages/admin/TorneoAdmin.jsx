@@ -182,7 +182,7 @@ export default function TorneoAdmin() {
           <button
             type="submit"
             disabled={guardarTorneo.isPending}
-            className="bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 rounded px-4 py-2 disabled:opacity-50"
+            className="bg-brand-700 hover:bg-brand-800 text-white rounded px-4 py-2 disabled:opacity-50"
           >
             Guardar
           </button>
@@ -560,7 +560,7 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
             <button
               onClick={() => guardarResultado.mutate()}
               disabled={guardarResultado.isPending}
-              className="bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 rounded px-3 py-2 disabled:opacity-50"
+              className="bg-brand-700 hover:bg-brand-800 text-white rounded px-3 py-2 disabled:opacity-50"
             >
               Guardar resultado
             </button>

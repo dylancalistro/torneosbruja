@@ -30,7 +30,7 @@ export default function TorneoTablaCard({ torneo }) {
 
       <Link
         to={`/torneos/${torneo.id}`}
-        className="block text-center text-xs font-medium text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 border-t border-gray-100 dark:border-gray-900 py-2"
+        className="block text-center text-xs font-medium text-gray-500 hover:text-accent-600 dark:hover:text-accent-500 border-t border-gray-100 dark:border-gray-900 py-2"
       >
         Ver fixture, goleadores y más →
       </Link>

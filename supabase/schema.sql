@@ -100,6 +100,8 @@ create table configuracion_sitio (
   instagram text,
   facebook text,
   descripcion_general text,
+  direccion text,
+  servicios text,
   logo_url text,
   updated_at timestamptz not null default now()
 );

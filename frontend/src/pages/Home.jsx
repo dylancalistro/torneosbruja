@@ -1,26 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
-import { getTorneos, getConfiguracion } from '../lib/api'
+import { getTorneos } from '../lib/api'
 import TorneoCard from '../components/TorneoCard'
 import TorneoTablaCard from '../components/TorneoTablaCard'
+import InfoComplejo from '../components/InfoComplejo'
 
 export default function Home() {
   const { data: torneos, isLoading, isError } = useQuery({
     queryKey: ['torneos'],
     queryFn: getTorneos,
   })
-  const { data: config } = useQuery({ queryKey: ['configuracion'], queryFn: getConfiguracion })
 
   const conTabla = torneos?.filter((t) => t.estado === 'activo' || t.estado === 'finalizado') ?? []
   const proximos = torneos?.filter((t) => t.estado === 'proximamente') ?? []
 
   return (
     <div className="space-y-10">
-      <section>
-        <h1 className="text-3xl font-bold tracking-tight">Torneos</h1>
-        {config?.descripcion_general && (
-          <p className="text-gray-500 mt-1">{config.descripcion_general}</p>
-        )}
-      </section>
+      <InfoComplejo />
 
       {isLoading && <p className="text-sm text-gray-500">Cargando torneos…</p>}
       {isError && <p className="text-sm text-red-500">No se pudieron cargar los torneos.</p>}

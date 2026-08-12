@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* Paleta de marca de Complejo 35 (azul marino + naranja del logo) */
+@theme {
+  --color-brand-50: #eef1f6;
+  --color-brand-100: #dbe2ec;
+  --color-brand-500: #34507a;
+  --color-brand-600: #2a3f61;
+  --color-brand-700: #1e2f4d;
+  --color-brand-800: #17253d;
+  --color-brand-900: #101a2c;
+
+  --color-accent-50: #fdf1e6;
+  --color-accent-100: #fbe1c4;
+  --color-accent-500: #f0791e;
+  --color-accent-600: #dd6812;
+  --color-accent-700: #b7550f;
+}
+
 :root {
   color-scheme: light dark;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;

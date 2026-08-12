@@ -10,7 +10,7 @@ export default function Tabs({ tabs, active, onChange, size = 'md' }) {
           onClick={() => onChange(tab.key)}
           className={`${padding} font-medium border-b-2 -mb-px transition-colors ${
             active === tab.key
-              ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400'
+              ? 'border-accent-500 text-accent-700 dark:text-accent-500'
               : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
           }`}
         >
