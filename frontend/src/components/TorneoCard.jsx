@@ -1,28 +1,29 @@
 import { Link } from 'react-router-dom'
-
-const ESTADO_LABEL = {
-  proximamente: 'Próximamente',
-  activo: 'En curso',
-  finalizado: 'Finalizado',
-}
+import { estadoCfg } from '../lib/estados'
 
 export default function TorneoCard({ torneo }) {
+  const cfg = estadoCfg(torneo.estado)
+
   return (
     <Link
       to={`/torneos/${torneo.id}`}
-      className="block border border-gray-200 dark:border-gray-800 rounded-lg p-4 hover:border-gray-400 dark:hover:border-gray-600 transition-colors"
+      className="group relative block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/60 p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-700"
     >
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="font-medium">{torneo.nombre}</h3>
-        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 whitespace-nowrap">
-          {ESTADO_LABEL[torneo.estado] ?? torneo.estado}
-        </span>
+      <span className={`absolute left-0 top-0 h-full w-1 ${cfg.accent}`} aria-hidden="true" />
+
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-semibold leading-snug">{torneo.nombre}</h3>
+        <span className={`shrink-0 text-xs font-medium px-2 py-1 rounded-full ${cfg.badge}`}>{cfg.label}</span>
       </div>
+
       {torneo.descripcion && (
-        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{torneo.descripcion}</p>
+        <p className="text-sm text-gray-500 mt-1.5 line-clamp-2">{torneo.descripcion}</p>
       )}
+
       {torneo.precio_texto && (
-        <p className="text-sm mt-2 font-medium">{torneo.precio_texto}</p>
+        <p className="text-sm mt-3 inline-flex items-center gap-1 font-medium text-gray-700 dark:text-gray-200">
+          {torneo.precio_texto}
+        </p>
       )}
     </Link>
   )

@@ -9,12 +9,7 @@ import {
 } from '../lib/api'
 import TablaPosiciones from '../components/TablaPosiciones'
 import TablaGoleadores from '../components/TablaGoleadores'
-
-const ESTADO_LABEL = {
-  proximamente: 'Próximamente',
-  activo: 'En curso',
-  finalizado: 'Finalizado',
-}
+import { estadoCfg } from '../lib/estados'
 
 export default function TorneoDetalle() {
   const { id } = useParams()
@@ -50,46 +45,59 @@ export default function TorneoDetalle() {
   const nombreEquipo = (equipoId) =>
     equipos?.find((e) => e.equipo?.id === equipoId)?.equipo?.nombre ?? '—'
 
+  const cfg = estadoCfg(torneo.estado)
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
         <Link to="/" className="text-sm text-gray-500 hover:underline">
           ← Volver a torneos
         </Link>
-        <div className="flex items-center gap-2 mt-2">
-          <h1 className="text-2xl font-semibold">{torneo.nombre}</h1>
-          <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800">
-            {ESTADO_LABEL[torneo.estado] ?? torneo.estado}
-          </span>
+        <div className="flex flex-wrap items-center gap-2 mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{torneo.nombre}</h1>
+          <span className={`text-xs font-medium px-2 py-1 rounded-full ${cfg.badge}`}>{cfg.label}</span>
         </div>
         {torneo.descripcion && <p className="text-gray-500 mt-1">{torneo.descripcion}</p>}
-        {torneo.precio_texto && <p className="mt-2 font-medium">{torneo.precio_texto}</p>}
+        {torneo.precio_texto && (
+          <p className="mt-3 inline-block text-sm font-medium bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1">
+            {torneo.precio_texto}
+          </p>
+        )}
       </div>
 
       <section>
-        <h2 className="font-medium mb-2">Tabla de posiciones</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">
+          Tabla de posiciones
+        </h2>
         <TablaPosiciones filas={posiciones} />
       </section>
 
       <section>
-        <h2 className="font-medium mb-2">Goleadores</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Goleadores</h2>
         <TablaGoleadores filas={goleadores} />
       </section>
 
       <section>
-        <h2 className="font-medium mb-2">Partidos</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Partidos</h2>
         {(!partidos || partidos.length === 0) && (
           <p className="text-sm text-gray-500">Todavía no hay partidos cargados.</p>
         )}
         <ul className="divide-y divide-gray-100 dark:divide-gray-900">
           {partidos?.map((p) => (
-            <li key={p.id} className="py-2 flex items-center justify-between text-sm">
+            <li key={p.id} className="py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
               <span>
-                {nombreEquipo(p.equipo_local_id)} vs {nombreEquipo(p.equipo_visitante_id)}
+                {nombreEquipo(p.equipo_local_id)} <span className="text-gray-400">vs</span>{' '}
+                {nombreEquipo(p.equipo_visitante_id)}
               </span>
-              <span className="font-medium">
-                {p.jugado ? `${p.goles_local} - ${p.goles_visitante}` : 'A jugar'}
-              </span>
+              {p.jugado ? (
+                <span className="font-semibold tabular-nums">
+                  {p.goles_local} - {p.goles_visitante}
+                </span>
+              ) : (
+                <span className="text-xs font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-1">
+                  A jugar
+                </span>
+              )}
             </li>
           ))}
         </ul>
