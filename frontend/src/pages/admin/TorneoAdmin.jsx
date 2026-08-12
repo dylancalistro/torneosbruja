@@ -22,7 +22,8 @@ import {
 } from '../../lib/api'
 
 const ESTADOS = ['proximamente', 'activo', 'finalizado']
-const INPUT_CLS = 'border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-transparent w-full'
+const INPUT_CLS =
+  'border border-gray-300 dark:border-gray-700 rounded px-3 py-2 w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
 
 export default function TorneoAdmin() {
   const { id } = useParams()

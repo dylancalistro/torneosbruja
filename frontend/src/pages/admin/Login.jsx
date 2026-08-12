@@ -61,7 +61,7 @@ export default function Login() {
             autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-transparent"
+            className="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
           />
         </div>
         <div>
@@ -75,7 +75,7 @@ export default function Login() {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-transparent"
+            className="w-full border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
           />
         </div>
 

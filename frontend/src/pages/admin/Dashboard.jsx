@@ -49,7 +49,7 @@ export default function Dashboard() {
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           placeholder="Nombre del nuevo torneo"
-          className="flex-1 border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-transparent"
+          className="flex-1 border border-gray-300 dark:border-gray-700 rounded px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
         />
         <button
           type="submit"
