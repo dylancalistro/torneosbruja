@@ -94,13 +94,13 @@ export default function Inicio() {
               src={VIDEO_NAVARRO}
               controls
               preload="metadata"
-              className="w-full max-w-xs sm:max-w-sm aspect-video object-cover rounded-xl bg-black"
+              className="w-full max-w-sm sm:max-w-md aspect-[1/2] object-cover rounded-xl bg-black"
             />
             <video
               src={VIDEO_TROGLIO}
               controls
               preload="metadata"
-              className="w-full max-w-xs sm:max-w-sm aspect-video object-cover rounded-xl bg-black"
+              className="w-full max-w-sm sm:max-w-md aspect-[1/2] object-cover rounded-xl bg-black"
             />
           </div>
         </div>
