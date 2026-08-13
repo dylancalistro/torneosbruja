@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { getConfiguracion } from '../lib/api'
-import { NOMBRE_MARCA, LOGO_URL } from '../lib/marca'
+import { NOMBRE_MARCA } from '../lib/marca'
 import { IMG_HERO, IMG_CANCHA, IMG_CUMPLE, VIDEO_CANCHA, VIDEO_NAVARRO, VIDEO_TROGLIO } from '../lib/assets'
 import { ChatIcon } from '../components/icons'
 import GaleriaGrid from '../components/GaleriaGrid'
@@ -21,7 +21,6 @@ export default function Inicio() {
       <section className="relative bg-cover bg-center" style={{ backgroundImage: `url(${IMG_HERO})` }}>
         <div className="absolute inset-0 bg-brand-900/70" aria-hidden="true" />
         <div className="relative max-w-5xl mx-auto px-4 py-24 sm:py-32 text-center text-white">
-          <img src={LOGO_URL} alt={NOMBRE_MARCA} className="w-20 h-20 mx-auto rounded-xl object-contain mb-4" />
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">{NOMBRE_MARCA}</h1>
           <p className="mt-3 text-lg text-white/90 max-w-xl mx-auto">
             {config?.descripcion_general || 'Fútbol 9, torneos, amistosos y eventos en La Plata.'}
@@ -64,7 +63,7 @@ export default function Inicio() {
       <section className="bg-gray-50 py-14">
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-center mb-8">Conocé el complejo</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 items-center">
             <img
               src={IMG_CANCHA}
               alt="Cancha de Complejo 35"
@@ -74,7 +73,7 @@ export default function Inicio() {
               src={VIDEO_CANCHA}
               controls
               preload="metadata"
-              className="w-full h-64 sm:h-80 object-cover rounded-xl bg-black"
+              className="w-full max-w-[260px] sm:max-w-xs mx-auto aspect-video object-cover rounded-xl bg-black"
             />
           </div>
         </div>
@@ -90,9 +89,19 @@ export default function Inicio() {
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-center mb-2">Nos recomiendan</h2>
           <p className="text-center text-gray-500 mb-8">Ex jugadores que ya nos visitaron</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <video src={VIDEO_NAVARRO} controls preload="metadata" className="w-full rounded-xl bg-black" />
-            <video src={VIDEO_TROGLIO} controls preload="metadata" className="w-full rounded-xl bg-black" />
+          <div className="flex flex-wrap justify-center gap-4">
+            <video
+              src={VIDEO_NAVARRO}
+              controls
+              preload="metadata"
+              className="w-full max-w-[260px] sm:max-w-xs aspect-video object-cover rounded-xl bg-black"
+            />
+            <video
+              src={VIDEO_TROGLIO}
+              controls
+              preload="metadata"
+              className="w-full max-w-[260px] sm:max-w-xs aspect-video object-cover rounded-xl bg-black"
+            />
           </div>
         </div>
       </section>

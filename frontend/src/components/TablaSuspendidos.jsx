@@ -4,29 +4,24 @@ export default function TablaSuspendidos({ filas }) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[420px] text-sm border-collapse">
-        <thead>
-          <tr className="border-b border-gray-200 dark:border-gray-800 text-left text-gray-500">
-            <th className="py-2 pr-2">Jugador</th>
-            <th className="py-2 pr-2">Equipo</th>
-            <th className="py-2 pr-2">Motivo</th>
-            <th className="py-2 pl-2 text-center">Restan / Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filas.map((s) => (
-            <tr key={s.id} className="border-b border-gray-100 dark:border-gray-900">
-              <td className="py-2 pr-2 font-medium">{s.jugador?.nombre}</td>
-              <td className="py-2 pr-2 text-gray-500">{s.equipo?.nombre}</td>
-              <td className="py-2 pr-2 text-gray-500">{s.motivo || '—'}</td>
-              <td className="py-2 pl-2 text-center font-semibold">
-                {s.partidos_restantes} / {s.partidos_totales}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <ul className="divide-y divide-gray-100">
+      {filas.map((s) => {
+        const cumplidas = s.partidos_totales - s.partidos_restantes
+        return (
+          <li key={s.id} className="py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <div>
+              <p className="font-medium">{s.jugador?.nombre}</p>
+              <p className="text-sm text-gray-500">
+                {s.equipo?.nombre}
+                {s.motivo ? ` · ${s.motivo}` : ''}
+              </p>
+            </div>
+            <span className="text-xs font-medium bg-gray-100 rounded-full px-3 py-1 whitespace-nowrap">
+              Cumplió {cumplidas} de {s.partidos_totales} {s.partidos_totales === 1 ? 'fecha' : 'fechas'}
+            </span>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
