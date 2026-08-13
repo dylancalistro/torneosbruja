@@ -73,7 +73,7 @@ export default function Inicio() {
               src={VIDEO_CANCHA}
               controls
               preload="metadata"
-              className="w-full max-w-[260px] sm:max-w-xs mx-auto aspect-video object-cover rounded-xl bg-black"
+              className="w-full h-64 sm:h-80 object-cover rounded-xl bg-black"
             />
           </div>
         </div>
@@ -94,13 +94,13 @@ export default function Inicio() {
               src={VIDEO_NAVARRO}
               controls
               preload="metadata"
-              className="w-full max-w-[260px] sm:max-w-xs aspect-video object-cover rounded-xl bg-black"
+              className="w-full max-w-xs sm:max-w-sm aspect-video object-cover rounded-xl bg-black"
             />
             <video
               src={VIDEO_TROGLIO}
               controls
               preload="metadata"
-              className="w-full max-w-[260px] sm:max-w-xs aspect-video object-cover rounded-xl bg-black"
+              className="w-full max-w-xs sm:max-w-sm aspect-video object-cover rounded-xl bg-black"
             />
           </div>
         </div>
