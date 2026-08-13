@@ -90,7 +90,7 @@ export default function TorneoAdmin() {
   const equiposDisponibles = todosLosEquipos?.filter((e) => !idsInscriptos.includes(e.id)) ?? []
 
   return (
-    <div className="space-y-10">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-10">
       <Link to="/admin" className="text-sm text-gray-500 hover:underline">
         ← Volver
       </Link>

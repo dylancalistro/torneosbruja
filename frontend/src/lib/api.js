@@ -88,6 +88,18 @@ export const getPartidos = (torneoId) =>
 export const getConfiguracion = () =>
   supabase.from('configuracion_sitio').select('*').eq('id', 1).single().then(throwIfError)
 
+export const getMedia = (categoria) => {
+  let query = supabase
+    .from('media')
+    .select('*')
+    .order('orden', { ascending: true })
+    .order('created_at', { ascending: false })
+  if (categoria) query = query.eq('categoria', categoria)
+  return query.then(throwIfError)
+}
+
+export const urlDeMedia = (path) => supabase.storage.from('media').getPublicUrl(path).data.publicUrl
+
 // ---------- Lecturas para el admin ----------
 
 export const getEquipos = () =>
@@ -177,3 +189,21 @@ export const eliminarSuspension = (id) =>
 
 export const actualizarConfiguracion = (cambios) =>
   supabase.from('configuracion_sitio').update(cambios).eq('id', 1).select().single().then(throwIfError)
+
+export const subirMedia = async ({ file, categoria, titulo }) => {
+  const ext = file.name.split('.').pop()
+  const path = `${categoria}/${crypto.randomUUID()}.${ext}`
+  const { error: uploadError } = await supabase.storage.from('media').upload(path, file)
+  if (uploadError) throw uploadError
+  return supabase
+    .from('media')
+    .insert({ categoria, storage_path: path, titulo: titulo || null })
+    .select()
+    .single()
+    .then(throwIfError)
+}
+
+export const eliminarMedia = async (item) => {
+  await supabase.storage.from('media').remove([item.storage_path])
+  return supabase.from('media').delete().eq('id', item.id).then(throwIfError)
+}

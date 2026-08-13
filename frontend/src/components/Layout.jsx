@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getConfiguracion } from '../lib/api'
 import { NOMBRE_MARCA, LOGO_URL } from '../lib/marca'
@@ -12,6 +12,11 @@ const CONTACTOS = [
   { key: 'facebook', Icon: FacebookIcon, href: (v) => v },
 ]
 
+const NAV_CLS = ({ isActive }) =>
+  `text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+    isActive ? 'bg-brand-700 text-white' : 'text-gray-600 hover:bg-gray-100'
+  }`
+
 export default function Layout() {
   const { data: config } = useQuery({ queryKey: ['configuracion'], queryFn: getConfiguracion })
 
@@ -19,21 +24,29 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-gray-200 dark:border-gray-800">
-        <nav className="max-w-4xl mx-auto flex items-center justify-between px-4 py-4">
+      <header className="border-b border-gray-200">
+        <nav className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 font-semibold text-lg tracking-tight">
             <img src={LOGO_URL} alt={NOMBRE_MARCA} className="w-9 h-9 rounded-md object-contain" />
             {NOMBRE_MARCA}
           </Link>
+          <div className="flex items-center gap-1">
+            <NavLink to="/" end className={NAV_CLS}>
+              Inicio
+            </NavLink>
+            <NavLink to="/torneos" className={NAV_CLS}>
+              Torneos
+            </NavLink>
+          </div>
         </nav>
       </header>
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
+      <main className="flex-1 w-full">
         <Outlet />
       </main>
 
-      <footer className="border-t border-gray-200 dark:border-gray-800 bg-brand-50 dark:bg-brand-900/40 mt-12">
-        <div className="max-w-4xl mx-auto px-4 py-10 grid gap-8 sm:grid-cols-2">
+      <footer className="border-t border-gray-200 bg-brand-50 mt-12">
+        <div className="max-w-5xl mx-auto px-4 py-10 grid gap-8 sm:grid-cols-2">
           <div className="flex gap-3">
             <img src={LOGO_URL} alt={NOMBRE_MARCA} className="w-10 h-10 rounded-md object-contain shrink-0" />
             <div>
@@ -54,7 +67,7 @@ export default function Layout() {
                       href={href(config[key])}
                       target={key === 'facebook' || key === 'instagram' || key === 'whatsapp' ? '_blank' : undefined}
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-accent-600 dark:hover:text-accent-500"
+                      className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-accent-600"
                     >
                       <Icon className="w-4 h-4 shrink-0 text-gray-400" />
                       {config[key]}
@@ -66,10 +79,12 @@ export default function Layout() {
           )}
         </div>
 
-        <div className="border-t border-gray-200 dark:border-gray-800">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between text-xs text-gray-400">
-            <span>© {new Date().getFullYear()} {NOMBRE_MARCA}</span>
-            <Link to="/admin/login" className="hover:text-gray-600 dark:hover:text-gray-300 hover:underline">
+        <div className="border-t border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between text-xs text-gray-400">
+            <span>
+              © {new Date().getFullYear()} {NOMBRE_MARCA}
+            </span>
+            <Link to="/admin/login" className="hover:text-gray-600 hover:underline">
               Acceso admin
             </Link>
           </div>

@@ -45,7 +45,7 @@ export default function Config() {
   if (isLoading || !form) return <p className="text-sm text-gray-500">Cargando…</p>
 
   return (
-    <div className="max-w-md space-y-4">
+    <div className="max-w-md mx-auto px-4 py-8 space-y-4">
       <Link to="/admin" className="text-sm text-gray-500 hover:underline">
         ← Volver
       </Link>

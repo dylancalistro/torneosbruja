@@ -48,9 +48,9 @@ export default function TorneoDetalle() {
   const equipoDe = (equipoId) => equipos?.find((e) => e.equipo?.id === equipoId)?.equipo
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <div>
-        <Link to="/" className="text-sm text-gray-500 hover:underline">
+        <Link to="/torneos" className="text-sm text-gray-500 hover:underline">
           ← Volver a torneos
         </Link>
         <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -59,7 +59,7 @@ export default function TorneoDetalle() {
         </div>
         {torneo.descripcion && <p className="text-gray-500 mt-1">{torneo.descripcion}</p>}
         {torneo.precio_texto && (
-          <p className="mt-3 inline-block text-sm font-medium bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1">
+          <p className="mt-3 inline-block text-sm font-medium bg-gray-100 rounded-full px-3 py-1">
             {torneo.precio_texto}
           </p>
         )}

@@ -47,7 +47,7 @@ export default function Login() {
   }
 
   return (
-    <div className="max-w-sm mx-auto">
+    <div className="max-w-sm mx-auto px-4 py-8">
       <h1 className="text-xl font-semibold mb-4">Acceso admin</h1>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>

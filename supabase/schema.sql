@@ -108,6 +108,22 @@ create table configuracion_sitio (
 
 insert into configuracion_sitio (id) values (1);
 
+-- Fotos que carga el admin desde el panel (canchas, partidos, etc.) via
+-- Supabase Storage. Assets fijos del sitio (logo, flyer, videos cortos) van
+-- bundleados en el frontend, no acá.
+insert into storage.buckets (id, name, public)
+values ('media', 'media', true)
+on conflict (id) do nothing;
+
+create table media (
+  id uuid primary key default gen_random_uuid(),
+  categoria text not null check (categoria in ('cancha', 'partido', 'general')),
+  storage_path text not null,
+  titulo text,
+  orden int not null default 0,
+  created_at timestamptz not null default now()
+);
+
 -- =========================================================
 -- ÍNDICES (para que las vistas rindan bien con mucha carga)
 -- =========================================================
@@ -125,6 +141,7 @@ create index idx_partido_goles_equipo on partido_goles(equipo_id);
 create index idx_tarjetas_partido on tarjetas(partido_id);
 create index idx_tarjetas_jugador on tarjetas(jugador_id);
 create index idx_suspensiones_torneo on suspensiones(torneo_id);
+create index idx_media_categoria on media(categoria);
 
 -- =========================================================
 -- VISTAS (cálculo automático de posiciones y goleadores)
@@ -246,6 +263,7 @@ alter table partido_goles enable row level security;
 alter table tarjetas enable row level security;
 alter table suspensiones enable row level security;
 alter table configuracion_sitio enable row level security;
+alter table media enable row level security;
 
 create policy "torneos_select_publico" on torneos for select using (true);
 create policy "torneos_insert_admin" on torneos for insert to authenticated with check (true);
@@ -289,3 +307,12 @@ create policy "suspensiones_delete_admin" on suspensiones for delete to authenti
 
 create policy "configuracion_select_publico" on configuracion_sitio for select using (true);
 create policy "configuracion_update_admin" on configuracion_sitio for update to authenticated using (true) with check (true);
+
+create policy "media_select_publico" on media for select using (true);
+create policy "media_insert_admin" on media for insert to authenticated with check (true);
+create policy "media_update_admin" on media for update to authenticated using (true) with check (true);
+create policy "media_delete_admin" on media for delete to authenticated using (true);
+
+create policy "media_bucket_select_publico" on storage.objects for select using (bucket_id = 'media');
+create policy "media_bucket_insert_admin" on storage.objects for insert to authenticated with check (bucket_id = 'media');
+create policy "media_bucket_delete_admin" on storage.objects for delete to authenticated using (bucket_id = 'media');
