@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tema fijo (siempre claro): las utilidades dark: solo se activan con
+   una clase ".dark" que nunca agregamos, en vez de seguir el modo
+   claro/oscuro del sistema operativo de cada dispositivo. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Paleta de marca de Complejo 35 (azul marino + naranja del logo) */
 @theme {
   --color-brand-50: #eef1f6;
@@ -18,7 +23,7 @@
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
