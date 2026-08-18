@@ -27,6 +27,7 @@ import {
   crearSuspension,
   actualizarSuspension,
   eliminarSuspension,
+  subirEscudoEquipo,
 } from '../../lib/api'
 
 const ESTADOS = ['proximamente', 'activo', 'finalizado']
@@ -299,19 +300,56 @@ function EquipoRow({ inscripcion, onQuitar }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jugadores', equipo.id] }),
   })
 
+  const subirEscudo = useMutation({
+    mutationFn: (file) => subirEscudoEquipo({ file, equipoId: equipo.id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['equipos-torneo'] })
+      queryClient.invalidateQueries({ queryKey: ['equipos'] })
+    },
+  })
+
   return (
     <div className="border border-gray-200 dark:border-gray-800 rounded p-3">
-      <div className="flex items-center justify-between">
-        <button onClick={() => setAbierto(!abierto)} className="font-medium hover:underline">
+      <div className="flex items-center justify-between gap-2">
+        <button onClick={() => setAbierto(!abierto)} className="flex items-center gap-2 font-medium hover:underline">
+          {equipo?.escudo_url ? (
+            <img src={equipo.escudo_url} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
+          ) : (
+            <span className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0" />
+          )}
           {equipo?.nombre}
+          <span className="text-xs text-gray-400 font-normal">{abierto ? '▲' : '▼'}</span>
         </button>
-        <button onClick={onQuitar} className="text-xs text-red-500 hover:underline">
+        <button onClick={onQuitar} className="text-xs text-red-500 hover:underline shrink-0">
           Quitar del torneo
         </button>
       </div>
 
       {abierto && (
         <div className="mt-3 space-y-2">
+          <div className="flex items-center gap-3">
+            {equipo?.escudo_url ? (
+              <img src={equipo.escudo_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+            ) : (
+              <span className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700" />
+            )}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Foto / escudo del equipo</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) subirEscudo.mutate(file)
+                }}
+                disabled={subirEscudo.isPending}
+                className="text-sm"
+              />
+              {subirEscudo.isPending && <p className="text-xs text-gray-500 mt-1">Subiendo…</p>}
+              {subirEscudo.isError && <p className="text-xs text-red-500 mt-1">No se pudo subir la foto.</p>}
+            </div>
+          </div>
+
           <p className="text-xs text-gray-500">Jugadores</p>
           <ul className="text-sm space-y-1">
             {jugadores?.map((j) => (
@@ -533,9 +571,14 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
   return (
     <div className="border border-gray-200 dark:border-gray-800 rounded p-3">
       <div className="flex items-center justify-between gap-2">
-        <button onClick={() => setAbierto(!abierto)} className="text-sm hover:underline text-left">
-          {nombreLocal} vs {nombreVisitante}{' '}
-          {partido.jugado ? `— ${partido.goles_local} a ${partido.goles_visitante}` : '(sin jugar)'}
+        <button onClick={() => setAbierto(!abierto)} className="flex-1 text-left group">
+          <span className="text-sm group-hover:underline">
+            {nombreLocal} vs {nombreVisitante}{' '}
+            {partido.jugado ? `— ${partido.goles_local} a ${partido.goles_visitante}` : '(sin jugar)'}
+          </span>
+          <span className="block text-xs text-gray-400 mt-0.5">
+            {abierto ? '▲ Ocultar' : '▼ Cargar resultado, goles y tarjetas'}
+          </span>
         </button>
         <button onClick={() => eliminar.mutate()} className="text-xs text-red-500 hover:underline shrink-0">
           Eliminar

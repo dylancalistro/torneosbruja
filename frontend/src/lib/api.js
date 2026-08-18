@@ -207,3 +207,12 @@ export const eliminarMedia = async (item) => {
   await supabase.storage.from('media').remove([item.storage_path])
   return supabase.from('media').delete().eq('id', item.id).then(throwIfError)
 }
+
+export const subirEscudoEquipo = async ({ file, equipoId }) => {
+  const ext = file.name.split('.').pop()
+  const path = `escudos/${equipoId}-${crypto.randomUUID()}.${ext}`
+  const { error: uploadError } = await supabase.storage.from('media').upload(path, file)
+  if (uploadError) throw uploadError
+  const escudo_url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl
+  return actualizarEquipo(equipoId, { escudo_url })
+}
