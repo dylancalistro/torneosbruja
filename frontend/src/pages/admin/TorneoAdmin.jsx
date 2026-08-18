@@ -33,6 +33,17 @@ const ESTADOS = ['proximamente', 'activo', 'finalizado']
 const INPUT_CLS =
   'border border-gray-300 dark:border-gray-700 rounded px-3 py-2 w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
 
+function Card({ title, className = '', children }) {
+  return (
+    <section
+      className={`rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 p-5 sm:p-6 space-y-3 ${className}`}
+    >
+      <h2 className="text-lg font-semibold">{title}</h2>
+      {children}
+    </section>
+  )
+}
+
 export default function TorneoAdmin() {
   const { id } = useParams()
   const queryClient = useQueryClient()
@@ -95,8 +106,7 @@ export default function TorneoAdmin() {
         ← Volver
       </Link>
 
-      <section className="space-y-3 max-w-lg">
-        <h1 className="text-xl font-semibold">Editar torneo</h1>
+      <Card title="Editar torneo" className="max-w-lg">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -187,11 +197,9 @@ export default function TorneoAdmin() {
             Guardar
           </button>
         </form>
-      </section>
+      </Card>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Equipos inscriptos</h2>
-
+      <Card title="Equipos inscriptos">
         <div className="flex flex-wrap gap-2 items-end">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Agregar equipo existente</label>
@@ -245,17 +253,15 @@ export default function TorneoAdmin() {
             />
           ))}
         </div>
-      </section>
+      </Card>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Partidos</h2>
+      <Card title="Partidos">
         <PartidosSection torneoId={id} equiposInscriptos={equiposInscriptos ?? []} />
-      </section>
+      </Card>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Suspendidos</h2>
+      <Card title="Suspendidos">
         <SuspensionesSection torneoId={id} />
-      </section>
+      </Card>
     </div>
   )
 }
