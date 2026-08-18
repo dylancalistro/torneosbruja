@@ -53,6 +53,34 @@ export function FacebookIcon(props) {
   )
 }
 
+export function ImageIcon(props) {
+  return (
+    <Svg {...props}>
+      <rect x="2" y="3" width="16" height="14" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="7" cy="8" r="1.5" />
+      <path
+        d="M4 15l4-4 3 3 3-4 4 5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  )
+}
+
+export function ContactCardIcon(props) {
+  return (
+    <Svg {...props}>
+      <rect x="2" y="4" width="16" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="7" cy="10" r="1.8" fill="none" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M4.5 14c.5-1.5 1.8-2 2.5-2s2 .5 2.5 2" stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+      <path d="M12 8h4M12 11h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </Svg>
+  )
+}
+
 export function WhatsAppIcon(props) {
   return (
     <Svg {...props}>

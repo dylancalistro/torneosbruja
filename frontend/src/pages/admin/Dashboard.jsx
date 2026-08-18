@@ -3,12 +3,28 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getTorneos, crearTorneo } from '../../lib/api'
 import { useAuth } from '../../lib/AuthContext'
+import { ImageIcon, ContactCardIcon } from '../../components/icons'
 
 const ESTADO_LABEL = {
   proximamente: 'Próximamente',
   activo: 'En curso',
   finalizado: 'Finalizado',
 }
+
+const ACCESOS = [
+  {
+    to: '/admin/galeria',
+    Icon: ImageIcon,
+    titulo: 'Galería',
+    descripcion: 'Subir y ordenar las fotos del complejo',
+  },
+  {
+    to: '/admin/config',
+    Icon: ContactCardIcon,
+    titulo: 'Datos de contacto',
+    descripcion: 'Teléfono, WhatsApp, redes y descripción del complejo',
+  },
+]
 
 export default function Dashboard() {
   const { signOut } = useAuth()
@@ -28,17 +44,31 @@ export default function Dashboard() {
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">Panel admin</h1>
-        <div className="flex flex-wrap gap-4 text-sm">
-          <Link to="/admin/galeria" className="hover:underline">
-            Galería
+        <button onClick={() => signOut()} className="text-sm text-gray-500 hover:underline">
+          Cerrar sesión
+        </button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {ACCESOS.map(({ to, Icon, titulo, descripcion }) => (
+          <Link
+            key={to}
+            to={to}
+            className="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-accent-500 hover:bg-accent-50 dark:hover:bg-gray-900 transition-colors"
+          >
+            <span className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full bg-brand-800 text-white">
+              <Icon className="w-5 h-5" />
+            </span>
+            <span>
+              <span className="block font-semibold">{titulo}</span>
+              <span className="block text-sm text-gray-500 mt-0.5">{descripcion}</span>
+            </span>
           </Link>
-          <Link to="/admin/config" className="hover:underline">
-            Datos de contacto
-          </Link>
-          <button onClick={() => signOut()} className="text-gray-500 hover:underline">
-            Cerrar sesión
-          </button>
-        </div>
+        ))}
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Torneos</h2>
       </div>
 
       <form
