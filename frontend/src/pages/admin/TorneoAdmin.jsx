@@ -34,12 +34,21 @@ const ESTADOS = ['proximamente', 'activo', 'finalizado']
 const INPUT_CLS =
   'border border-gray-300 dark:border-gray-700 rounded px-3 py-2 w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
 
-function Card({ title, className = '', children }) {
+const CARD_COLORS = {
+  brand: { bg: 'bg-brand-50', border: 'border-brand-500', title: 'text-brand-800', dot: 'bg-brand-600' },
+  accent: { bg: 'bg-accent-50', border: 'border-accent-500', title: 'text-accent-700', dot: 'bg-accent-600' },
+  blue: { bg: 'bg-blue-50', border: 'border-blue-400', title: 'text-blue-800', dot: 'bg-blue-600' },
+  red: { bg: 'bg-red-50', border: 'border-red-400', title: 'text-red-800', dot: 'bg-red-600' },
+}
+
+function Card({ title, color = 'brand', className = '', children }) {
+  const c = CARD_COLORS[color]
   return (
-    <section
-      className={`rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 p-5 sm:p-6 space-y-3 ${className}`}
-    >
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <section className={`rounded-xl border-l-4 ${c.border} ${c.bg} p-5 sm:p-6 space-y-3 ${className}`}>
+      <h2 className={`text-lg font-semibold flex items-center gap-2 ${c.title}`}>
+        <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${c.dot}`} />
+        {title}
+      </h2>
       {children}
     </section>
   )
@@ -107,7 +116,7 @@ export default function TorneoAdmin() {
         ← Volver
       </Link>
 
-      <Card title="Editar torneo" className="max-w-lg">
+      <Card title="Editar torneo" color="brand" className="max-w-lg">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -200,7 +209,7 @@ export default function TorneoAdmin() {
         </form>
       </Card>
 
-      <Card title="Equipos inscriptos">
+      <Card title="Equipos inscriptos" color="accent">
         <div className="flex flex-wrap gap-2 items-end">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Agregar equipo existente</label>
@@ -220,7 +229,7 @@ export default function TorneoAdmin() {
           <button
             disabled={!equipoAAgregar || inscribirExistente.isPending}
             onClick={() => inscribirExistente.mutate()}
-            className="border border-gray-300 dark:border-gray-700 rounded px-3 py-2 disabled:opacity-50"
+            className="bg-accent-500 hover:bg-accent-600 text-white rounded px-3 py-2 disabled:opacity-50"
           >
             Inscribir
           </button>
@@ -239,7 +248,7 @@ export default function TorneoAdmin() {
           <button
             disabled={!nuevoEquipoNombre.trim() || crearYInscribir.isPending}
             onClick={() => crearYInscribir.mutate()}
-            className="border border-gray-300 dark:border-gray-700 rounded px-3 py-2 disabled:opacity-50"
+            className="bg-accent-500 hover:bg-accent-600 text-white rounded px-3 py-2 disabled:opacity-50"
           >
             Crear e inscribir
           </button>
@@ -256,11 +265,11 @@ export default function TorneoAdmin() {
         </div>
       </Card>
 
-      <Card title="Partidos">
+      <Card title="Partidos" color="blue">
         <PartidosSection torneoId={id} equiposInscriptos={equiposInscriptos ?? []} />
       </Card>
 
-      <Card title="Suspendidos">
+      <Card title="Suspendidos" color="red">
         <SuspensionesSection torneoId={id} />
       </Card>
     </div>
@@ -309,16 +318,16 @@ function EquipoRow({ inscripcion, onQuitar }) {
   })
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded p-3">
+    <div className="border border-accent-100 bg-white rounded-lg p-3 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <button onClick={() => setAbierto(!abierto)} className="flex items-center gap-2 font-medium hover:underline">
           {equipo?.escudo_url ? (
             <img src={equipo.escudo_url} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
           ) : (
-            <span className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0" />
+            <span className="w-6 h-6 rounded-full bg-gray-200 shrink-0" />
           )}
           {equipo?.nombre}
-          <span className="text-xs text-gray-400 font-normal">{abierto ? '▲' : '▼'}</span>
+          <span className="text-xs text-accent-600 font-normal">{abierto ? '▲' : '▼'}</span>
         </button>
         <button onClick={onQuitar} className="text-xs text-red-500 hover:underline shrink-0">
           Quitar del torneo
@@ -326,12 +335,12 @@ function EquipoRow({ inscripcion, onQuitar }) {
       </div>
 
       {abierto && (
-        <div className="mt-3 space-y-2">
+        <div className="mt-3 space-y-2 border-t border-accent-100 pt-3">
           <div className="flex items-center gap-3">
             {equipo?.escudo_url ? (
               <img src={equipo.escudo_url} alt="" className="w-12 h-12 rounded-full object-cover" />
             ) : (
-              <span className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700" />
+              <span className="w-12 h-12 rounded-full bg-gray-200" />
             )}
             <div>
               <label className="block text-xs text-gray-500 mb-1">Foto / escudo del equipo</label>
@@ -375,7 +384,7 @@ function EquipoRow({ inscripcion, onQuitar }) {
             <button
               disabled={!nombreJugador.trim() || agregar.isPending}
               onClick={() => agregar.mutate()}
-              className="border border-gray-300 dark:border-gray-700 rounded px-3 disabled:opacity-50"
+              className="border border-accent-300 text-accent-700 rounded px-3 hover:bg-accent-50 disabled:opacity-50"
             >
               Agregar
             </button>
@@ -452,7 +461,7 @@ function PartidosSection({ torneoId, equiposInscriptos }) {
         <button
           disabled={!local || !visitante || local === visitante || crear.isPending}
           onClick={() => crear.mutate()}
-          className="border border-gray-300 dark:border-gray-700 rounded px-3 py-2 disabled:opacity-50"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-2 disabled:opacity-50"
         >
           Crear partido
         </button>
@@ -569,14 +578,20 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
   })
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded p-3">
+    <div className="border border-blue-100 bg-white rounded-lg p-3 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <button onClick={() => setAbierto(!abierto)} className="flex-1 text-left group">
           <span className="text-sm group-hover:underline">
             {nombreLocal} vs {nombreVisitante}{' '}
-            {partido.jugado ? `— ${partido.goles_local} a ${partido.goles_visitante}` : '(sin jugar)'}
+            {partido.jugado ? (
+              <span className="font-semibold text-blue-700">
+                — {partido.goles_local} a {partido.goles_visitante}
+              </span>
+            ) : (
+              <span className="text-gray-400">(sin jugar)</span>
+            )}
           </span>
-          <span className="block text-xs text-gray-400 mt-0.5">
+          <span className="block text-xs text-blue-500 mt-0.5">
             {abierto ? '▲ Ocultar' : '▼ Cargar resultado, goles y tarjetas'}
           </span>
         </button>
@@ -586,8 +601,8 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
       </div>
 
       {abierto && (
-        <div className="mt-3 space-y-4">
-          <div className="flex items-end gap-2">
+        <div className="mt-3 space-y-4 border-t border-blue-100 pt-3">
+          <div className="flex items-end gap-2 bg-blue-50 rounded-lg p-3">
             <Campo label={nombreLocal}>
               <input
                 type="number"
@@ -615,8 +630,8 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
             </button>
           </div>
 
-          <div>
-            <p className="text-xs text-gray-500 mb-1">Goleadores del partido</p>
+          <div className="bg-green-50 rounded-lg p-3">
+            <p className="text-xs font-medium text-green-700 mb-1">⚽ Goleadores del partido</p>
             <ul className="text-sm space-y-1 mb-2">
               {goles?.map((g) => (
                 <li key={g.id} className="flex items-center justify-between">
@@ -640,15 +655,15 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
               <button
                 disabled={!jugadorGol || agregarGolMut.isPending}
                 onClick={() => agregarGolMut.mutate()}
-                className="border border-gray-300 dark:border-gray-700 rounded px-3 disabled:opacity-50"
+                className="bg-green-600 hover:bg-green-700 text-white rounded px-3 disabled:opacity-50"
               >
                 + Gol
               </button>
             </div>
           </div>
 
-          <div>
-            <p className="text-xs text-gray-500 mb-1">Tarjetas del partido</p>
+          <div className="bg-amber-50 rounded-lg p-3">
+            <p className="text-xs font-medium text-amber-700 mb-1">🟨🟥 Tarjetas del partido</p>
             <ul className="text-sm space-y-1 mb-2">
               {tarjetas?.map((t) => (
                 <li key={t.id} className="flex items-center justify-between">
@@ -689,7 +704,7 @@ function PartidoRow({ partido, nombreLocal, nombreVisitante, torneoId }) {
               <button
                 disabled={!jugadorTarjeta || agregarTarjetaMut.isPending}
                 onClick={() => agregarTarjetaMut.mutate()}
-                className="border border-gray-300 dark:border-gray-700 rounded px-3 disabled:opacity-50"
+                className="bg-amber-500 hover:bg-amber-600 text-white rounded px-3 disabled:opacity-50"
               >
                 + Tarjeta
               </button>
@@ -782,15 +797,18 @@ function SuspensionesSection({ torneoId }) {
         <button
           disabled={!jugadorId || crear.isPending}
           onClick={() => crear.mutate()}
-          className="border border-gray-300 dark:border-gray-700 rounded px-3 py-2 disabled:opacity-50"
+          className="bg-red-600 hover:bg-red-700 text-white rounded px-3 py-2 disabled:opacity-50"
         >
           Suspender
         </button>
       </div>
 
-      <ul className="divide-y divide-gray-100 dark:divide-gray-900">
+      <ul className="space-y-2">
         {suspensiones?.map((s) => (
-          <li key={s.id} className="py-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+          <li
+            key={s.id}
+            className="bg-white border border-red-100 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2 text-sm"
+          >
             <span>
               <span className="font-medium">{s.jugador?.nombre}</span>{' '}
               <span className="text-gray-500">
@@ -799,13 +817,17 @@ function SuspensionesSection({ torneoId }) {
               </span>
             </span>
             <span className="flex items-center gap-2">
-              <span className="font-semibold">
+              <span
+                className={`font-semibold text-xs rounded-full px-2.5 py-1 ${
+                  s.partidos_restantes > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                }`}
+              >
                 {s.partidos_restantes} / {s.partidos_totales}
               </span>
               {s.partidos_restantes > 0 && (
                 <button
                   onClick={() => restarFecha.mutate(s)}
-                  className="text-xs border border-gray-300 dark:border-gray-700 rounded px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="text-xs border border-red-200 text-red-700 rounded px-2 py-1 hover:bg-red-50"
                 >
                   Cumplió 1 fecha
                 </button>

@@ -4,12 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getTorneos, crearTorneo } from '../../lib/api'
 import { useAuth } from '../../lib/AuthContext'
 import { ImageIcon, ContactCardIcon } from '../../components/icons'
-
-const ESTADO_LABEL = {
-  proximamente: 'Próximamente',
-  activo: 'En curso',
-  finalizado: 'Finalizado',
-}
+import { estadoCfg } from '../../lib/estados'
 
 const ACCESOS = [
   {
@@ -17,12 +12,16 @@ const ACCESOS = [
     Icon: ImageIcon,
     titulo: 'Galería',
     descripcion: 'Subir y ordenar las fotos del complejo',
+    badge: 'bg-accent-500',
+    hover: 'hover:border-accent-500 hover:bg-accent-50',
   },
   {
     to: '/admin/config',
     Icon: ContactCardIcon,
     titulo: 'Datos de contacto',
     descripcion: 'Teléfono, WhatsApp, redes y descripción del complejo',
+    badge: 'bg-brand-700',
+    hover: 'hover:border-brand-500 hover:bg-brand-50',
   },
 ]
 
@@ -50,13 +49,13 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {ACCESOS.map(({ to, Icon, titulo, descripcion }) => (
+        {ACCESOS.map(({ to, Icon, titulo, descripcion, badge, hover }) => (
           <Link
             key={to}
             to={to}
-            className="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-accent-500 hover:bg-accent-50 dark:hover:bg-gray-900 transition-colors"
+            className={`flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-colors ${hover}`}
           >
-            <span className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full bg-brand-800 text-white">
+            <span className={`w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-white ${badge}`}>
               <Icon className="w-5 h-5" />
             </span>
             <span>
@@ -95,18 +94,26 @@ export default function Dashboard() {
       {crear.isError && <p className="text-sm text-red-500">No se pudo crear el torneo.</p>}
 
       {isLoading && <p className="text-sm text-gray-500">Cargando…</p>}
-      <ul className="divide-y divide-gray-100 dark:divide-gray-900">
-        {torneos?.map((t) => (
-          <li key={t.id} className="py-3 flex items-center justify-between">
-            <div>
-              <p className="font-medium">{t.nombre}</p>
-              <p className="text-xs text-gray-500">{ESTADO_LABEL[t.estado] ?? t.estado}</p>
-            </div>
-            <Link to={`/admin/torneos/${t.id}`} className="text-sm hover:underline">
-              Gestionar →
-            </Link>
-          </li>
-        ))}
+      <ul className="space-y-2">
+        {torneos?.map((t) => {
+          const cfg = estadoCfg(t.estado)
+          return (
+            <li
+              key={t.id}
+              className="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between"
+            >
+              <div>
+                <p className="font-medium">{t.nombre}</p>
+                <span className={`inline-block text-xs font-medium rounded-full px-2.5 py-0.5 mt-1 ${cfg.badge}`}>
+                  {cfg.label}
+                </span>
+              </div>
+              <Link to={`/admin/torneos/${t.id}`} className="text-sm text-brand-700 font-medium hover:underline">
+                Gestionar →
+              </Link>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )
